@@ -69,6 +69,9 @@
 			"category": "Developer Tools",
 			"icon": "build/darwin/app.icns"
 		},
+		"win": {
+			"icon": "build/win/app.ico"
+		},
 		"files": [
 			"bin",
 			"euiruntime",
