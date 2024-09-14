@@ -16,7 +16,7 @@ import { EditorPart } from 'egret/editor/common/parts/editorPart';
 import { Panel } from 'egret/parts/browser/panel';
 import { FileService } from '../services/files/fileServices';
 import { initExtensions } from 'egret/exts/extsInits';
-import { OutputView } from '../parts/output/browser/outputView';
+import { OutputView } from '../parts/output/browser/OutputView';
 import { AlignView } from '../parts/align/electron-browser/views/alignView';
 import { IDisposable, dispose } from 'egret/base/common/lifecycle';
 import { ILifecycleService } from 'egret/platform/lifecycle/common/lifecycle';

@@ -1,6 +1,6 @@
 import { IOutputService } from './output';
 import { IWorkspaceService } from 'egret/platform/workspace/common/workspace';
-import { OutputView } from '../browser/outputView';
+import { OutputView } from '../browser/OutputView';
 
 export class OutPutService implements IOutputService {
 	_serviceBrand: undefined;

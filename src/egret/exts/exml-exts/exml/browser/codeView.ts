@@ -1,5 +1,5 @@
 import { ICodeView, ICodeViewContainer } from './editors';
-import { CodeEditor } from './codeeditor/CodeEditor';
+import { CodeEditor } from './codeeditor/codeEditor';
 import { IExmlFileEditorModel } from '../common/exml/models';
 import { IDisposable, dispose } from 'egret/base/common/lifecycle';
 import { IInstantiationService } from 'egret/platform/instantiation/common/instantiation';

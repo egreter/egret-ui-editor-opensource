@@ -7,12 +7,13 @@ import { IFileService } from 'egret/platform/files/common/files';
 import { IEgretProjectService } from '../../project';
 import { IFileModelService } from 'egret/workbench/services/editor/common/models';
 import { INotificationService } from 'egret/platform/notification/common/notifications';
+import { ExmlModelHelper } from './exml/helpers';
 
 /**
  * Exml文件编辑器数据层
  */
 export class ExmlFileEditorModel extends FileEditorModel implements IExmlFileEditorModel {
-	
+
 	constructor(
 		resource: URI,
 		@IFileService protected instantiationService: IInstantiationService,
@@ -55,7 +56,7 @@ export class ExmlFileEditorModel extends FileEditorModel implements IExmlFileEdi
 	 * 立即检查模块是否脏了
 	 */
 	public updateDirty(): void {
-		if(this.getModel()){
+		if (this.getModel()) {
 			const currentHistory = this.getModel().peekUndo();
 			if (!currentHistory && !this.historyCache) {
 				this.setDirty(false);
@@ -76,7 +77,7 @@ export class ExmlFileEditorModel extends FileEditorModel implements IExmlFileEdi
 	protected setDirty(dirty: boolean): void {
 		super.setDirty(dirty);
 		if (!dirty) {
-			if(this.getModel()){
+			if (this.getModel()) {
 				this.historyCache = this.getModel().peekUndo();
 			}
 		}
@@ -84,7 +85,15 @@ export class ExmlFileEditorModel extends FileEditorModel implements IExmlFileEdi
 
 	protected doCreateValueFromModel(model: IExmlModel): Promise<string> {
 		const text = model.getText();
-		return Promise.resolve(text);
+		if (ExmlModelHelper.canOptimizeEXML(text)) {
+			const optimizedText = ExmlModelHelper.startOptimizeEXML(text);
+			model.setText(optimizedText);
+			// console.log(optimizedText);
+			return Promise.resolve(optimizedText);
+		}
+		else {
+			return Promise.resolve(text);
+		}
 	}
 	/**
 	 * exml数据模块 
@@ -97,7 +106,7 @@ export class ExmlFileEditorModel extends FileEditorModel implements IExmlFileEdi
 	 * 是否可以撤销
 	 */
 	public getCanUndo(): boolean {
-		if(!this.getModel()){
+		if (!this.getModel()) {
 			return false;
 		}
 		return this.getModel().getCanUndo();
@@ -106,7 +115,7 @@ export class ExmlFileEditorModel extends FileEditorModel implements IExmlFileEdi
 	 * 撤销
 	 */
 	public undo(): void {
-		if(this.getModel()){
+		if (this.getModel()) {
 			this.getModel().undo();
 		}
 	}
@@ -114,7 +123,7 @@ export class ExmlFileEditorModel extends FileEditorModel implements IExmlFileEdi
 	 * 是否可以重做
 	 */
 	public getCanRedo(): boolean {
-		if(!this.getModel()){
+		if (!this.getModel()) {
 			return false;
 		}
 		return this.getModel().getCanRedo();
@@ -123,7 +132,7 @@ export class ExmlFileEditorModel extends FileEditorModel implements IExmlFileEdi
 	 * 重做
 	 */
 	public redo(): void {
-		if(this.getModel()){
+		if (this.getModel()) {
 			this.getModel().redo();
 		}
 	}

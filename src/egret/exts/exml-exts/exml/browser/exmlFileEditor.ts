@@ -17,7 +17,7 @@ import { IFocusablePart, KeybindingType } from 'egret/platform/operations/common
 import { localize } from 'egret/base/localization/nls';
 import { SystemCommands } from 'egret/platform/operations/commands/systemCommands';
 import { CodeView } from './codeView';
-import { OutputView } from 'egret/workbench/parts/output/browser/outputView';
+import { OutputView } from 'egret/workbench/parts/output/browser/OutputView';
 import { AnimationView } from 'egret/workbench/parts/animation/electron-browser/views/animationView';
 import { IMultiPageEditor } from 'egret/editor/core/editors';
 import { BackgroundSettingPanel } from './exmleditor/background/BackgroundSettingPanel';

@@ -202,6 +202,19 @@ export class EValue extends HashObject implements IValue {
 		if (this._instance === value) {
 			return;
 		}
+		if (this._hostProperty === 'x' || this._hostProperty === 'y'
+			|| this._hostProperty === 'width' || this._hostProperty === 'height'
+			|| this._hostProperty === 'anchorOffsetX' || this._hostProperty === 'anchorOffsetY'
+			|| this._hostProperty === 'scaleX' || this._hostProperty === 'scaleY'
+			|| this._hostProperty === 'top' || this._hostProperty === 'bottom' || this._hostProperty === 'left' || this._hostProperty === 'right'
+			|| this._hostProperty === 'horizontalCenter' || this._hostProperty === 'verticalCenter'
+			|| this._hostProperty === 'rotation' || this._hostProperty === 'alpha' || this._hostProperty === 'skewX' || this._hostProperty === 'skewY'
+		) {
+			//判断是不是小数，如果是最多保留两位小数
+			if (value % 1 !== 0) {
+				value = Math.round(value * 100) / 100;
+			}
+		}
 		this._instance = value;
 		this._onInstanceChanged.fire({ target: this });
 	}
@@ -943,7 +956,6 @@ export class EObject extends EValue implements IObject {
 		if (value && value.getNs().uri === W_EUI.uri) {
 			return;
 		}
-
 		let formatValue: any = undefined;
 		if (value) {
 			formatValue = value.getInstance();
