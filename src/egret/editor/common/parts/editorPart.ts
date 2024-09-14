@@ -60,8 +60,8 @@ export class EditorPart implements IEditorPart, IFocusablePart {
 	public executeCommand<T>(command: string, ...args): Promise<any> {
 		const currentEditor = this.getActiveEditor();
 		if (currentEditor) {
-			if('EditMode' in currentEditor){
-				if((currentEditor as IMultiPageEditor).EditMode === EditMode.CODE){
+			if ('EditMode' in currentEditor) {
+				if ((<any>currentEditor as IMultiPageEditor).EditMode === EditMode.CODE) {
 					return Promise.resolve(void 0);
 				}
 			}
@@ -398,7 +398,7 @@ export class EditorPart implements IEditorPart, IFocusablePart {
 
 	private async doHandleDirty(editor: IEditor): Promise<boolean> {
 		if ('syncModelData' in editor) {
-			await (editor as IMultiPageEditor).syncModelData();
+			await (<any>editor as IMultiPageEditor).syncModelData();
 		}
 		if (!editor || !editor.input || !editor.input.isDirty()) {
 			return Promise.resolve(false);

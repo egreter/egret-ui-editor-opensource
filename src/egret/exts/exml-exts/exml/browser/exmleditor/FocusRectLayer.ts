@@ -20,6 +20,7 @@ import { Point2D, expandPolygon } from './utils/polygonUtils';
 import { isMacintosh } from 'egret/base/common/platform';
 import { Emitter, Event as VSEvent } from 'egret/base/common/event';
 import { OperateLayer } from './operatelayers/OperateLayer';
+import { IMouseWheelEvent } from 'vs/base/browser/mouseEvent';
 
 
 
@@ -766,7 +767,7 @@ export class FocusRectLayer extends EventDispatcher implements IAbosrbLineProvid
 			case 'mousedown':
 				this.mouseDownHandler(e);
 				this.attachMouseEvent();
-				if(e.button === 0){
+				if (e.button === 0) {
 					this.leftMouseDown = true;
 				}
 				if (e.button === 2) {
@@ -789,10 +790,10 @@ export class FocusRectLayer extends EventDispatcher implements IAbosrbLineProvid
 				this.mouseMoveHandler(e);
 				break;
 			case 'mouseup':
-				if(e.button === 0){
+				if (e.button === 0) {
 					this.leftMouseDown = false;
 				}
-				if(e.button === 2){
+				if (e.button === 2) {
 					this.rightMouseDown = false;
 				}
 				if (!this.dragEnabled && this.moving) {
@@ -804,7 +805,7 @@ export class FocusRectLayer extends EventDispatcher implements IAbosrbLineProvid
 				this.detachMouseEvent();
 				break;
 			case 'wheel':
-				let event: MouseWheelEvent = e;
+				let event: IMouseWheelEvent = e;
 				if (event.ctrlKey) {
 					if (isMacintosh) {
 						this.gestureZoom_handler(event);
@@ -891,7 +892,7 @@ export class FocusRectLayer extends EventDispatcher implements IAbosrbLineProvid
 		this.updateCursor();
 	}
 
-	private mouseWheelHandler(event: MouseWheelEvent): void {
+	private mouseWheelHandler(event: IMouseWheelEvent): void {
 		var curScale = this.scale;
 		var delta = event.deltaY;
 		if (delta > 0) {
@@ -916,14 +917,14 @@ export class FocusRectLayer extends EventDispatcher implements IAbosrbLineProvid
 
 		this.setViewTo({ x: this.movePoint.x, y: this.movePoint.y, scale: targetScale }, true, 0.1)
 	}
-	private gesturePan_handler(event: MouseWheelEvent): void {
+	private gesturePan_handler(event: IMouseWheelEvent): void {
 		var offsetX = event.deltaX / 2;
 		var offsetY = event.deltaY / 2;
 		this.movePoint.x -= offsetX;
 		this.movePoint.y -= offsetY;
 		this.updateTargetPos();
 	}
-	private gestureZoom_handler(event: MouseWheelEvent): void {
+	private gestureZoom_handler(event: IMouseWheelEvent): void {
 		var curScale = this.scale;
 		var delta = event.deltaY / 5;
 		delta = delta * (this.scale / 5);
@@ -1938,7 +1939,8 @@ export class FocusRectExt extends FocusRect implements IP9TTarget {
 	private setTargetPropertyValue(property: string): void {
 		const animationModel = this.targetNode.getExmlModel().getAnimationModel();
 		let value = this.willUpdateValueDic[property];
-		if (value !== undefined && value !== null && value !== NaN) {
+		if (value !== undefined && value !== null && !Number.isNaN(value)) {
+			console.log("setTargetPropertyValue", property, value);
 			if (animationModel.inKeyFrame()) {
 				const editingPath = animationModel.getSelectedItem().findEditingPath(animationModel.getTime(), false);
 				editingPath.path.setProperty(property, this.rn(value));
@@ -1952,13 +1954,13 @@ export class FocusRectExt extends FocusRect implements IP9TTarget {
 			/**预处理（规整数值和处理排斥项） */
 			if (property === 'anchorOffsetX') {
 				let w: number = this.willUpdateValueDic['width'];
-				if (w === undefined || w === null || w === NaN) {
+				if (w === undefined || w === null || Number.isNaN(w)) {
 					w = this._width;
 				}
 				value = value * w;
 			} else if (property === 'width') {
 				let anchorX: number = this.willUpdateValueDic['anchorOffsetX'];
-				if (anchorX === undefined || anchorX === null || anchorX === NaN) {
+				if (anchorX === undefined || anchorX === null || Number.isNaN(anchorX)) {
 					anchorX = this._anchorX;
 				}
 				if (this.canSetAnchor) {
@@ -1973,13 +1975,13 @@ export class FocusRectExt extends FocusRect implements IP9TTarget {
 				}
 			} else if (property === 'anchorOffsetY') {
 				let h: number = this.willUpdateValueDic['height'];
-				if (h === undefined || h === null || h === NaN) {
+				if (h === undefined || h === null || Number.isNaN(h)) {
 					h = this._height;
 				}
 				value = value * h;
 			} else if (property === 'height') {
 				let anchorY: number = this.willUpdateValueDic['anchorOffsetY'];
-				if (anchorY === undefined || anchorY === null || anchorY === NaN) {
+				if (anchorY === undefined || anchorY === null || Number.isNaN(anchorY)) {
 					anchorY = this._anchorY;
 				}
 				if (this.canSetAnchor) {

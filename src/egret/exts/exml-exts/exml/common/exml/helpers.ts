@@ -11,6 +11,7 @@ import { IDisposable } from 'egret/base/common/lifecycle';
 import * as sax from '../sax/sax';
 import * as xmlTagUtil from '../sax/xml-tagUtils';
 import * as fs from 'fs';
+import { XMLFormatUtil } from '../contentassist/XMLFormat';
 
 /**
  * ExmlModel工具
@@ -351,5 +352,79 @@ export class ExmlModelHelper implements IDisposable {
 	 */
 	public dispose(): void {
 		this._model = null;
+	}
+
+	//================================================
+	// rontian 扩展的静态方法
+	//================================================
+	public static formatEXML(text: string, options?: monaco.languages.FormattingOptions): string {
+		if (!options) {
+			options = {
+				tabSize: 4,
+				insertSpaces: true,
+			};
+		}
+		const tabSize = options.tabSize;
+		const insertSpaces = options.insertSpaces;
+		let start = 0;
+		let end = text.length;
+		let lineBreak: string = '\n';
+		if (text.indexOf('\r\n') !== -1) {
+			lineBreak = '\r\n';
+		} else if (text.indexOf('\n') !== -1) {
+			lineBreak = '\n';
+		} else if (text.indexOf('\r') !== -1) {
+			lineBreak = '\n';
+		}
+		const result = XMLFormatUtil.format(text, start, end, !insertSpaces, insertSpaces ? tabSize : 1, 120, false, true, lineBreak);
+		return result.formatedText;
+	}
+	public static canOptimizeEXML(text: string): boolean {
+		return this.hasDefaultProperties(text) || this.hasLongDecimalProperties(text);
+	}
+	public static startOptimizeEXML(text: string, formated: boolean = true): string {
+		if (this.hasDefaultProperties(text)) {
+			text = this.optimizeDefaultProperties(text);
+		}
+		if (this.hasLongDecimalProperties(text)) {
+			text = this.optimizeLongDecimalProperties(text);
+		}
+		text = this.optimizeSpace(text);
+		if (formated) {
+			text = this.formatEXML(text);
+		}
+		return text;
+	}
+	private static hasDefaultProperties(text: string): boolean {
+		let reg = /((?:\w+\.)?(?:\b(?:scaleX|scaleY|alpha)="1"|\b(?:x|y)="0"|\b(?:visible)="true"))/gm;
+		if (reg.test(text)) {
+			return true;
+		}
+		return false;
+	}
+	private static optimizeDefaultProperties(text: string): string {
+		let reg = /((?:\w+\.)?(?:\b(?:scaleX|scaleY|alpha)="1"|\b(?:x|y)="0"|\b(?:visible)="true"))/gm;
+		return text.replace(reg, (template: string) => {
+			return "";
+		});
+	}
+	private static hasLongDecimalProperties(text: string): boolean {
+		let reg = /\b(?:x|y|width|height|left|right|top|bottom|alpha|rotation|scaleX|scaleY)="-?(\d+\.\d{2,})"/gm;
+		if (reg.test(text)) {
+			return true;
+		}
+		return false;
+	}
+	private static optimizeLongDecimalProperties(text: string): string {
+		let reg = /\b(?:x|y|width|height|left|right|top|bottom|alpha|rotation|scaleX|scaleY)="-?(\d+\.\d{2,})"/gm;
+		return text.replace(reg, (template: string, decimal: string) => {
+			return template.replace(/-?\d+\.\d{2,}/, (Math.round(parseFloat(decimal) * 100) / 100).toString());
+		});
+	}
+	private static optimizeSpace(text: string): string {
+		let reg = /\<\s*(?:[^<>]*?)\s*>|<\s*(?:[^<>]*?)\s*\/>/g;
+		return text.replace(reg, (template: string) => {
+			return template.replace(/\s+/g, " ");
+		});
 	}
 }

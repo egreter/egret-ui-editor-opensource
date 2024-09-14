@@ -19,7 +19,7 @@
 				"runtimeExecutable": "${workspaceRoot}/node_modules/.bin/electron.cmd"
 			},
 			"args": [
-				"."
+				"--inspect=9225 ."
 			]
 		},
 		{
@@ -43,7 +43,6 @@
 				"--remote-debugging-port=9225",
 				"."
 			],
-			"breakOnLoad": true
 		}
 	]
 }

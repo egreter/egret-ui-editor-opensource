@@ -1,4 +1,4 @@
-import { PropertyBasePart } from '../core/PropertyDetailParts';
+import { PropertyBasePart } from '../core/propertyDetailParts';
 import { localize } from 'egret/base/localization/nls';
 import { INode, isInstanceof } from 'egret/exts/exml-exts/exml/common/exml/treeNodes';
 import { AttributeItemGroup } from 'egret/base/browser/ui/containers';

@@ -210,12 +210,12 @@ export class SizeAndPosGroupLogicRunner {
 			node.setProperty(prop, dValue);
 			if (isNumber) {
 				if (prop === 'width') {
-					if (node.getInstance()['percentWidth'] !== NaN) {
+					if (!Number.isNaN(node.getInstance()['percentWidth'])) {
 						node.getInstance()['percentWidth'] = NaN;
 					}
 				}
 				else if (prop === 'height') {
-					if (node.getInstance()['percentHeight'] !== NaN) {
+					if (!Number.isNaN(node.getInstance()['percentHeight'])) {
 						node.getInstance()['percentHeight'] = NaN;
 					}
 				}
