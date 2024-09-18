@@ -55,7 +55,7 @@ export interface ITemporaryData {
 	/**
 	 * 图层滚动条的位置
 	 */
-	layerScrollPos:number;
+	layerScrollPos: number;
 }
 
 
@@ -155,7 +155,7 @@ export interface IExmlModel extends IInnerModel {
 	 * 设置编辑的文本
 	 * @param value 
 	 */
-	setText(value: string): void;
+	setText(value: string, isOptimize?: boolean): void;
 	/** XML Tags of text content in this model.  */
 	getContentTag(): sax.Tag;
 	/**

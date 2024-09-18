@@ -1095,15 +1095,20 @@ export class ExmlModel implements IExmlModel {
 	 * 设置编辑的文本
 	 * @param value 
 	 */
-	public setText(value: string): void {
+	public setText(value: string, isOptimize: boolean = false): void {
 		if (value === this._text) {
 			return;
 		}
 		this._text = value;
-		this.needRefreshTree = true;
-		this.undoList.length = 0;
-		this.redoList.length = 0;
-		this.refreshTree();
+		if (isOptimize) {
+			this.dispatchTextChangeEvent(this._text, 0, this._text.length);
+		}
+		else {
+			this.needRefreshTree = true;
+			this.undoList.length = 0;
+			this.redoList.length = 0;
+			this.refreshTree();
+		}
 	}
 
 	private _contentTag: sax.Tag;

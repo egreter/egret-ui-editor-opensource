@@ -87,7 +87,7 @@ export class ExmlFileEditorModel extends FileEditorModel implements IExmlFileEdi
 		const text = model.getText();
 		if (ExmlModelHelper.canOptimizeEXML(text)) {
 			const optimizedText = ExmlModelHelper.startOptimizeEXML(text);
-			model.setText(optimizedText);
+			model.setText(optimizedText, true);
 			// console.log(optimizedText);
 			return Promise.resolve(optimizedText);
 		}
