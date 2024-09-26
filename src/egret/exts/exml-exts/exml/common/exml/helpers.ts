@@ -418,7 +418,7 @@ export class ExmlModelHelper implements IDisposable {
 	private static optimizeLongDecimalProperties(text: string): string {
 		let reg = /\b(?:x|y|width|height|left|right|top|bottom|alpha|rotation|scaleX|scaleY)="-?(\d+\.\d{2,})"/gm;
 		return text.replace(reg, (template: string, decimal: string) => {
-			return template.replace(/-?\d+\.\d{2,}/, (Math.round(parseFloat(decimal) * 100) / 100).toString());
+			return template.replace(/\d+\.\d{2,}/, (Math.round(parseFloat(decimal) * 100) / 100).toString());
 		});
 	}
 	private static optimizeSpace(text: string): string {
