@@ -396,14 +396,14 @@ export class ExmlModelHelper implements IDisposable {
 		return text;
 	}
 	private static hasDefaultProperties(text: string): boolean {
-		let reg = /((?:\w+\.)?(?:\b(?:scaleX|scaleY|alpha)="1"|\b(?:x|y)="0"|\b(?:visible)="true"))/gm;
+		let reg = /((?:\w+\.)?(?:\b(?:scaleX|scaleY|alpha)="1"|\b(?:x|y)="0"))/gm;
 		if (reg.test(text)) {
 			return true;
 		}
 		return false;
 	}
 	private static optimizeDefaultProperties(text: string): string {
-		let reg = /((?:\w+\.)?(?:\b(?:scaleX|scaleY|alpha)="1"|\b(?:x|y)="0"|\b(?:visible)="true"))/gm;
+		let reg = /((?:\w+\.)?(?:\b(?:scaleX|scaleY|alpha)="1"|\b(?:x|y)="0"))/gm;
 		return text.replace(reg, (template: string) => {
 			return "";
 		});
