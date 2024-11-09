@@ -111,7 +111,7 @@ export class Workbench implements IFocusablePart {
 			projectName = paths.basename(workspace.uri.fsPath);
 		}
 		if (projectName) {
-			window.setTitle(`${projectName} - Egret UI Editor`);
+			window.setTitle(`${projectName}:${workspace.uri.fsPath} - Egret UI Editor`);
 		} else {
 			window.setTitle(`Egret UI Editor`);
 		}
@@ -291,14 +291,14 @@ export class Workbench implements IFocusablePart {
 		// 剪贴板服务
 		this.serviceCollection.set(IClipboardService, new ClipboardService());
 		// 输出服务
-		this.serviceCollection.set(IOutputService,this.instantiationService.createInstance(OutPutService));
+		this.serviceCollection.set(IOutputService, this.instantiationService.createInstance(OutPutService));
 		// 文件服务
 		this.fileService = this.instantiationService.createInstance(FileService, this.workspaceService.getWorkspace() ? this.workspaceService.getWorkspace().uri : null);
 		this.serviceCollection.set(IFileService, this.fileService);
 		// 文件数据模型服务
 		this.serviceCollection.set(IFileModelService, new SyncDescriptor(FileModelService));
 		// 资源管理器服务
-		this.serviceCollection.set(IExplorerService,this.instantiationService.createInstance(ExplorerService));
+		this.serviceCollection.set(IExplorerService, this.instantiationService.createInstance(ExplorerService));
 		// 编辑器部分
 		this.editorPart = this.instantiationService.createInstance(EditorPart);
 		this.editorService = this.instantiationService.createInstance(WorkbenchEditorService, this.editorPart);
