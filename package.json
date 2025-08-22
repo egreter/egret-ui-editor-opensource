@@ -28,6 +28,7 @@
 		"@egret/eui-compiler": "^2.0.0"
 	},
 	"devDependencies": {
+		"@electron/notarize": "^3.0.2",
 		"@types/fs-extra": "^9.0.6",
 		"@types/gsap": "^1.20.2",
 		"@types/minimist": "^1.2.1",
@@ -64,15 +65,19 @@
 		"directories": {
 			"output": "../dist"
 		},
-		"asar": false,
+		"asar": true,
 		"mac": {
-			"identity": "Apple Development: jingrong Tian (7AA2HZWMEB)",
 			"category": "Developer Tools",
-			"icon": "build/darwin/app.icns"
+			"icon": "build/darwin/app.icns",
+			"hardenedRuntime": true,
+			"entitlements": "build/entitlements.mac.plist",
+			"entitlementsInherit": "build/entitlements.mac.plist",
+			"gatekeeperAssess": false
 		},
 		"win": {
 			"icon": "build/win/app.ico"
 		},
+		"afterSign": "build/after-sign-hook.js",
 		"files": [
 			"bin",
 			"euiruntime",
