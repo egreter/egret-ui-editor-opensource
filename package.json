@@ -66,6 +66,7 @@
 		},
 		"asar": false,
 		"mac": {
+			"identity": "Apple Development: jingrong Tian (7AA2HZWMEB)",
 			"category": "Developer Tools",
 			"icon": "build/darwin/app.icns"
 		},
