@@ -30,6 +30,8 @@ export class SizePosPart extends BasePart {
 
 	private currentNodes: INode[] = null;
 	private skinNodes: INode[] = null;
+	private changingTimeout: any;
+	private changedTimeout: any;
 	/**
 	 * 关联的属性发生了改变
 	 * @param nodes 
@@ -248,6 +250,15 @@ export class SizePosPart extends BasePart {
 	}
 
 	private numberChanging_handler(type: PropertyTypes, value: number | string, supportPercent: boolean): void {
+		if (this.changingTimeout) {
+			clearTimeout(this.changingTimeout);
+		}
+		this.changingTimeout = setTimeout(() => {
+			this.doNumberChanging(type, value, supportPercent);
+		}, 16); // 16ms防抖动，约60fps
+	}
+
+	private doNumberChanging(type: PropertyTypes, value: number | string, supportPercent: boolean): void {
 		if (!this.currentNodes) {
 			return;
 		}
@@ -283,6 +294,15 @@ export class SizePosPart extends BasePart {
 	}
 
 	private numberhanged_handler(type: PropertyTypes, value: number | string, supportPercent: boolean): void {
+		if (this.changedTimeout) {
+			clearTimeout(this.changedTimeout);
+		}
+		this.changedTimeout = setTimeout(() => {
+			this.doNumberChanged(type, value, supportPercent);
+		}, 50); // 50ms防抖动，确保输入完成后才更新
+	}
+
+	private doNumberChanged(type: PropertyTypes, value: number | string, supportPercent: boolean): void {
 		if (!this.currentNodes) {
 			return;
 		}
@@ -302,5 +322,18 @@ export class SizePosPart extends BasePart {
 				setPropertyNum(node, type, value as any);
 			}
 		}
+	}
+
+	public dispose(): void {
+		// 清理防抖动定时器
+		if (this.changingTimeout) {
+			clearTimeout(this.changingTimeout);
+			this.changingTimeout = null;
+		}
+		if (this.changedTimeout) {
+			clearTimeout(this.changedTimeout);
+			this.changedTimeout = null;
+		}
+		super.dispose();
 	}
 }

@@ -1328,6 +1328,7 @@ export class FocusRect extends EventDispatcher {
 	}
 
 	private _targetNode: INode;
+	private isRefreshing: boolean = false;
 	/**目标节点 */
 	public get targetNode(): INode {
 		return this._targetNode;
@@ -1371,8 +1372,16 @@ export class FocusRect extends EventDispatcher {
 		}
 	}
 	private nodeEventHandler(): void {
-		this.refreshDisplay();
-		this.flushDraw();
+		if (this.isRefreshing) {
+			return; // 防止递归调用
+		}
+		this.isRefreshing = true;
+		try {
+			this.refreshDisplay();
+			this.flushDraw();
+		} finally {
+			this.isRefreshing = false;
+		}
 	}
 
 	private _parentFocusRect: FocusRect;

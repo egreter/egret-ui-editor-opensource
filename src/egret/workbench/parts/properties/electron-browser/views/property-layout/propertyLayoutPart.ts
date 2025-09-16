@@ -25,6 +25,8 @@ enum PropertyTypes {
  * 布局属性部分
  */
 export class PropertyLayoutPart extends PropertyBasePart {
+	private layoutChangeTimeout: any;
+	
 	constructor(owner: AccordionGroup,
 		@IInstantiationService private instantiationService: IInstantiationService
 		) {
@@ -200,6 +202,15 @@ export class PropertyLayoutPart extends PropertyBasePart {
 	}
 
 	private layoutChanged_handler(value: IDropDownTextDataSource): void {
+		if (this.layoutChangeTimeout) {
+			clearTimeout(this.layoutChangeTimeout);
+		}
+		this.layoutChangeTimeout = setTimeout(() => {
+			this.doLayoutChanged(value);
+		}, 50); // 50ms防抖动
+	}
+
+	private doLayoutChanged(value: IDropDownTextDataSource): void {
 		if(!this.currentNodes || !this.model){
 			return;
 		}
@@ -217,5 +228,14 @@ export class PropertyLayoutPart extends PropertyBasePart {
 				}
 			}
 		}
+	}
+
+	public dispose(): void {
+		// 清理防抖动定时器
+		if (this.layoutChangeTimeout) {
+			clearTimeout(this.layoutChangeTimeout);
+			this.layoutChangeTimeout = null;
+		}
+		super.dispose();
 	}
 }
