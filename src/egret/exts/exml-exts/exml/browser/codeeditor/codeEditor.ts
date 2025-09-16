@@ -8,6 +8,17 @@ import { ICodeService } from '../../common/server/ICodeService';
 import { BaseTextEditor } from 'egret/editor/browser/baseTextEditor';
 
 /**
+ * 编辑器状态接口
+ */
+interface EditorState {
+	selections: monaco.ISelection[];
+	position: monaco.IPosition;
+	scrollTop: number;
+	scrollLeft: number;
+	viewState: monaco.editor.ICodeEditorViewState;
+}
+
+/**
  */
 export class CodeEditor extends BaseTextEditor {
 
@@ -50,12 +61,18 @@ export class CodeEditor extends BaseTextEditor {
 			this.updateSelectedNodeBySelection();
 		} else {
 			if (this._isActive && this.exmlFileModel && this.textChanged()) {
+				// 保存当前编辑器状态
+				const savedState = this.saveEditorState();
+				
 				this.editor.executeEdits('edit exml code', [{
 					range: this.editor.getModel().getFullModelRange(),
 					text: this.exmlFileModel.getModel().getText(),
 					forceMoveMarkers: true
 				}]);
 				this.resetState();
+				
+				// 恢复编辑器状态
+				this.restoreEditorState(savedState);
 			}
 			this.updateSelectionBySelectedNode();
 			this.editor.focus();
@@ -67,8 +84,14 @@ export class CodeEditor extends BaseTextEditor {
 	 * @param text 
 	 */
 	private setText(text: string): void {
+		// 保存当前编辑器状态
+		const savedState = this.saveEditorState();
+		
 		this.editor.setValue(text);
 		this.resetState();
+		
+		// 恢复编辑器状态（主要是恢复光标位置和滚动位置）
+		this.restoreEditorState(savedState);
 	}
 
 	public async syncText(): Promise<void> {
@@ -112,11 +135,17 @@ export class CodeEditor extends BaseTextEditor {
 		// 只在编辑源码时更新，频繁全量更新会占用大量内存
 		// TODO 避免更新整个文件，只更新修改的部分
 		if (this._isActive && this.textChanged()) {
+			// 保存当前编辑器状态
+			const savedState = this.saveEditorState();
+			
 			this.editor.executeEdits('edit exml code', [{
 				range: this.editor.getModel().getFullModelRange(),
 				text: e.target.getText(),
 				forceMoveMarkers: true
 			}]);
+			
+			// 恢复编辑器状态
+			this.restoreEditorState(savedState);
 		}
 	}
 
@@ -233,6 +262,64 @@ export class CodeEditor extends BaseTextEditor {
 					nodes[i].setSelected(true);
 				}
 			}
+		}
+	}
+
+	/**
+	 * 保存编辑器状态
+	 */
+	private saveEditorState(): EditorState | null {
+		if (!this.editor || !this.editor.getModel()) {
+			return null;
+		}
+
+		try {
+			return {
+				selections: this.editor.getSelections() || [],
+				position: this.editor.getPosition() || { lineNumber: 1, column: 1 },
+				scrollTop: this.editor.getScrollTop(),
+				scrollLeft: this.editor.getScrollLeft(),
+				viewState: this.editor.saveViewState()
+			};
+		} catch (error) {
+			console.warn('Failed to save editor state:', error);
+			return null;
+		}
+	}
+
+	/**
+	 * 恢复编辑器状态
+	 */
+	private restoreEditorState(state: EditorState | null): void {
+		if (!state || !this.editor || !this.editor.getModel()) {
+			return;
+		}
+
+		try {
+			// 使用setTimeout确保DOM更新完成后再恢复状态
+			setTimeout(() => {
+				if (!this.editor || !this.editor.getModel()) {
+					return;
+				}
+
+				// 恢复view state（包含滚动位置和光标位置等）
+				if (state.viewState) {
+					this.editor.restoreViewState(state.viewState);
+				} else {
+					// 如果viewState恢复失败，手动恢复关键状态
+					if (state.selections && state.selections.length > 0) {
+						this.editor.setSelections(state.selections);
+					} else if (state.position) {
+						this.editor.setPosition(state.position);
+					}
+
+					// 恢复滚动位置
+					this.editor.setScrollTop(state.scrollTop);
+					this.editor.setScrollLeft(state.scrollLeft);
+				}
+			}, 0);
+		} catch (error) {
+			console.warn('Failed to restore editor state:', error);
 		}
 	}
 
