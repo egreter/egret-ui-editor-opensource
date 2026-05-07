@@ -367,10 +367,6 @@ export class RectPart extends BasePart {
 		if(!this.currentNodes){
 			return;
 		}
-		for(let i = 0;i<this.currentNodes.length;i++){
-			const node = this.currentNodes[i];
-			node.setInstanceValue('fillAlpha',value);
-		}
 	}
 	private fillAlphaChanged_handler(value:number):void{
 		if(!this.currentNodes){
@@ -441,10 +437,6 @@ export class RectPart extends BasePart {
 		if(!this.currentNodes){
 			return;
 		}
-		for(let i = 0;i<this.currentNodes.length;i++){
-			const node = this.currentNodes[i];
-			node.setInstanceValue('strokeAlpha',value);
-		}
 	}
 	private strokeAlphaChanged_handler(value:number):void{
 		if(!this.currentNodes){
@@ -459,10 +451,6 @@ export class RectPart extends BasePart {
 	private strokeWeightChanging_handler(value:number):void{
 		if(!this.currentNodes){
 			return;
-		}
-		for(let i = 0;i<this.currentNodes.length;i++){
-			const node = this.currentNodes[i];
-			node.setInstanceValue('strokeWeight',value);
 		}
 	}
 	private strokeWeightChanged_handler(value:number):void{
@@ -481,10 +469,6 @@ export class RectPart extends BasePart {
 		if(!this.currentNodes){
 			return;
 		}
-		for(let i = 0;i<this.currentNodes.length;i++){
-			const node = this.currentNodes[i];
-			node.setInstanceValue('ellipseWidth',value);
-		}
 	}
 	private ellipseWidthChanged_handler(value:number):void{
 		if(!this.currentNodes){
@@ -501,10 +485,6 @@ export class RectPart extends BasePart {
 	private ellipseHeightChanging_handler(value:number):void{
 		if(!this.currentNodes){
 			return;
-		}
-		for(let i = 0;i<this.currentNodes.length;i++){
-			const node = this.currentNodes[i];
-			node.setInstanceValue('ellipseHeight',value);
 		}
 	}
 	private ellipseHeightChanged_handler(value:number):void{

@@ -441,10 +441,6 @@ export class LabelPart extends BasePart {
 		if(!this.currentNodes){
 			return;
 		}
-		for(let i = 0;i<this.currentNodes.length;i++){
-			const node = this.currentNodes[i];
-			node.setInstanceValue('size',value);
-		}
 	}
 	private sizeChanged_handler(value:number):void{
 		if(!this.currentNodes){

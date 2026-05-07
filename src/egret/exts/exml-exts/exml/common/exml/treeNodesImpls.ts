@@ -45,6 +45,15 @@ class EventDisposableManager {
  * 值类型节点
  */
 export class EValue extends HashObject implements IValue {
+	/**
+	 * 实例值变化的节流记录表
+	 */
+	static _instanceChangeThrottle: { [nodeId: string]: number } = {};
+	/**
+	 * 节流间隔，单位毫秒
+	 */
+	static readonly THROTTLE_INTERVAL = 16;
+
 	readonly _onInstanceChanged: Emitter<InstanceChangedEvent>;
 	/**
 	 * 实例改变事件
@@ -1023,6 +1032,13 @@ export class EObject extends EValue implements IObject {
 		this._instance[key] = value;
 		this.changedPropertyDic[key] = true;
 		if (enabledDispatchEvent) {
+			const nodeId = this.getId() || this.toString();
+			const now = Date.now();
+			const lastTime = EValue._instanceChangeThrottle[nodeId] || 0;
+			if (now - lastTime < EValue.THROTTLE_INTERVAL) {
+				return;
+			}
+			EValue._instanceChangeThrottle[nodeId] = now;
 			this._onInstanceValueChanged.fire({ property: key, target: this });
 		}
 	}

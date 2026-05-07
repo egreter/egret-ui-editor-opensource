@@ -181,17 +181,7 @@ export class BaseLayoutPart extends BasePart {
 	}
 
 	private numberChanging_handler(type: string, value: number): void {
-		if (!this.currentNodes) {
-			return;
-		}
-		for (let i = 0; i < this.currentNodes.length; i++) {
-			const node = this.currentNodes[i];
-			const layoutValue = node.getProperty('layout') as IObject;
-			if (!layoutValue || !isInstanceof(layoutValue, 'eui.IObject')) {
-				return;
-			}
-			node.setInstanceValue(type, value);
-		}
+		// 移除 setInstanceValue 调用，现在只依赖 numberChanged_handler 处理
 	}
 	private numberChanged_handler(type: string, value: number): void {
 		if (!this.currentNodes) {

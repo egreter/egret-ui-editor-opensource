@@ -45,6 +45,7 @@ export class FocusRectLayerEvent extends Event {
  * 焦点层
  */
 export class FocusRectLayer extends EventDispatcher implements IAbosrbLineProvider {
+	public static _lastRefreshTime: number = 0;
 	public egretContentHost: EgretContentHost;
 	private egretSprite;
 
@@ -1329,6 +1330,10 @@ export class FocusRect extends EventDispatcher {
 
 	private _targetNode: INode;
 	private isRefreshing: boolean = false;
+	private _pendingRefresh: boolean = false;
+	private _needsRefresh: boolean = false;
+	private _deferredRefreshTimer: any = null;
+	public static _lastRefreshTime: number = 0;
 	/**目标节点 */
 	public get targetNode(): INode {
 		return this._targetNode;
@@ -1372,20 +1377,63 @@ export class FocusRect extends EventDispatcher {
 		}
 	}
 	private nodeEventHandler(): void {
+		const currentStackDepth = (window as any).__egretRefreshStackDepth || 0;
+		if (currentStackDepth > 10) {
+			this.scheduleDeferredRefresh();
+			return;
+		}
+
+		const now = Date.now();
+		if (!FocusRectLayer._lastRefreshTime) {
+			FocusRectLayer._lastRefreshTime = now;
+		}
+		const timeSinceLastRefresh = now - FocusRectLayer._lastRefreshTime;
+		if (timeSinceLastRefresh < 16 && this._pendingRefresh) {
+			return;
+		}
+
 		if (this.isRefreshing) {
-			return; // 防止递归调用
+			this._needsRefresh = true;
+			return;
 		}
-		this.isRefreshing = true;
-		try {
-			this.refreshDisplay();
-			this.flushDraw();
-		} finally {
-			this.isRefreshing = false;
+
+		if (this._pendingRefresh) {
+			return;
 		}
+		this._pendingRefresh = true;
+		this._needsRefresh = false;
+
+		requestAnimationFrame(() => {
+			this._pendingRefresh = false;
+			if (!this._needsRefresh && !this.targetNode) {
+				return;
+			}
+			(window as any).__egretRefreshStackDepth = currentStackDepth + 1;
+			try {
+				this.isRefreshing = true;
+				this.refreshDisplay();
+				this.flushDraw();
+			} catch (error) {
+				console.error('FocusRect refresh error:', error);
+			} finally {
+				this.isRefreshing = false;
+				(window as any).__egretRefreshStackDepth = currentStackDepth;
+			}
+		});
+	}
+
+	private scheduleDeferredRefresh(): void {
+		if (this._deferredRefreshTimer) {
+			return;
+		}
+		this._deferredRefreshTimer = setTimeout(() => {
+			this._deferredRefreshTimer = null;
+			this._needsRefresh = true;
+			this.nodeEventHandler();
+		}, 160);
 	}
 
 	private _parentFocusRect: FocusRect;
-	/**父级焦点对象 */
 	public get parentFocusRect(): FocusRect {
 		return this._parentFocusRect;
 	}
@@ -1560,18 +1608,28 @@ export class FocusRect extends EventDispatcher {
 		egretObj.addEventListener('complete', this.instanceEventHandle, this);
 		var parentInstance = egretObj.parent;
 		if (parentInstance && 'validateNow' in parentInstance) {
-			(<any>parentInstance['validateNow'])();
+			try {
+				(<any>parentInstance['validateNow'])();
+			} catch (e) {
+				console.warn('validateNow error:', e);
+			}
 		}
 		var m: Matrix = new Matrix(1, 0, 0, 1, -egretObj.anchorOffsetX, -egretObj.anchorOffsetY);
 		m.concat(egretObj.matrix.clone() as any)
 		//由于相对布局的问题，如果自身发生变化可能会引起父级的变化，这里更新一下父级
-		if (this.parentFocusRect && this.lastMatrix && (
-			!m.equals(this.lastMatrix) ||
-			this.lastInstanceWidth !== egretObj.width ||
-			this.lastInstanceHeight !== egretObj.height)) {
+		const hasMatrixChanged = !this.lastMatrix || !m.equals(this.lastMatrix);
+		const hasSizeChanged = this.lastInstanceWidth !== egretObj.width || this.lastInstanceHeight !== egretObj.height;
+
+		if (this.parentFocusRect && (hasMatrixChanged || hasSizeChanged)) {
 			this.lastInstanceWidth = egretObj.width;
 			this.lastInstanceHeight = egretObj.height;
-			this.parentFocusRect.refreshDisplay();
+			// 只有栈深度安全时才刷新父级
+			const currentDepth = (window as any).__egretRefreshStackDepth || 0;
+			if (currentDepth < 5) {
+				this.parentFocusRect.refreshDisplay();
+			} else {
+				this.parentFocusRect._needsRefresh = true;
+			}
 		}
 		this._Width = egretObj.width;
 		this._Height = egretObj.height;

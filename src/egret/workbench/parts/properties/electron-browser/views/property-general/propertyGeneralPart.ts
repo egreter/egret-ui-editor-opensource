@@ -625,17 +625,10 @@ export class PropertyGeneralPart extends PropertyBasePart {
 		this.setPropertyBooleanByLabel('touchChildren',value ? value.id : null);
 	}
 
-	private alphaChanging_handler(value: string): void {
+		private alphaChanging_handler(value: string): void {
 		const nodes: INode[] = this.model.getSelectedNodes();
 		if (!nodes || nodes.length == 0) {
 			return;
-		}
-		const valueNumber = value ?  Number.parseFloat(value) : 1;
-		for (let i = 0; i < nodes.length; i++) {
-			const node = nodes[i];
-			if(node.getInstance()){
-				node.getInstance()['alpha'] = valueNumber;
-			}
 		}
 	}
 

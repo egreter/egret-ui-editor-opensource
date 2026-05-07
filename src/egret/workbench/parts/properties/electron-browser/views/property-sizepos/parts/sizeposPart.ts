@@ -255,7 +255,7 @@ export class SizePosPart extends BasePart {
 		}
 		this.changingTimeout = setTimeout(() => {
 			this.doNumberChanging(type, value, supportPercent);
-		}, 16); // 16ms防抖动，约60fps
+		}, 100); // 100ms防抖动
 	}
 
 	private doNumberChanging(type: PropertyTypes, value: number | string, supportPercent: boolean): void {

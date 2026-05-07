@@ -9,6 +9,12 @@ import { dispose } from 'egret/base/common/lifecycle';
  */
 export class AutoRefreshHelper implements IDisposable{
 
+	// 全局刷新队列
+	private static _globalRefreshQueue: Set<AutoRefreshHelper> = new Set();
+	private static _globalRefreshTimer: any = null;
+	private static _lastRefreshTime: number = 0;
+	private static readonly MIN_REFRESH_INTERVAL: number = 50;
+
 	private _relateProps:string[] = [];
 	private _onChanged:Emitter<INode[]>;
 
@@ -47,21 +53,80 @@ export class AutoRefreshHelper implements IDisposable{
 		this.selectedListChanged_handler();
 	}
 
+	private _scheduledRefresh: boolean = false;
+
 	private treeChanged_handler(e:TreeChangedEvent):void{
 		if(!e.value){
 			return;
 		}
 		if(e.kind == TreeChangedKind.ADD) {
-			this.refresh();
-		}else if(!this._relateProps || this._relateProps.indexOf(e.property as string) !== -1){
-			this.refresh();
+			this.scheduleRefresh();
+		}else if(this._relateProps && this._relateProps.length > 0){
+			const changedProperty = e.property as string;
+			const isRelatedProperty = this._relateProps.indexOf(changedProperty) !== -1;
+			const isInstanceValueChange = changedProperty === null;
+
+			if (!isRelatedProperty && !isInstanceValueChange) {
+				return;
+			}
+			this.scheduleRefresh();
 		}
 	}
 	private selectedListChanged_handler(e:SelectedListChangedEvent = null):void{
-		this.refresh();
+		this.scheduleRefresh();
 	}
 
 	private refreshing:boolean = false;
+	private scheduleRefresh(): void {
+		if (this._scheduledRefresh) {
+			return;
+		}
+		this._scheduledRefresh = true;
+		AutoRefreshHelper._globalRefreshQueue.add(this);
+
+		if (AutoRefreshHelper._globalRefreshTimer) {
+			return;
+		}
+
+		const now = Date.now();
+		const timeSinceLastRefresh = now - AutoRefreshHelper._lastRefreshTime;
+
+		if (timeSinceLastRefresh < AutoRefreshHelper.MIN_REFRESH_INTERVAL) {
+			const delay = AutoRefreshHelper.MIN_REFRESH_INTERVAL - timeSinceLastRefresh;
+			AutoRefreshHelper._globalRefreshTimer = setTimeout(() => {
+				AutoRefreshHelper._globalRefreshTimer = null;
+				AutoRefreshHelper._lastRefreshTime = Date.now();
+				AutoRefreshHelper.flushGlobalRefreshQueue();
+			}, delay);
+		} else {
+			AutoRefreshHelper._lastRefreshTime = now;
+			AutoRefreshHelper._globalRefreshTimer = setTimeout(() => {
+				AutoRefreshHelper._globalRefreshTimer = null;
+				AutoRefreshHelper.flushGlobalRefreshQueue();
+			}, 0);
+		}
+	}
+
+	private static flushGlobalRefreshQueue(): void {
+		const queue = new Set(AutoRefreshHelper._globalRefreshQueue);
+		AutoRefreshHelper._globalRefreshQueue.clear();
+
+		requestAnimationFrame(() => {
+			queue.forEach(helper => {
+				helper._scheduledRefresh = false;
+				if (helper.refreshing) {
+					return;
+				}
+				helper.refreshing = true;
+				try {
+					helper.doRefresh();
+				} finally {
+					helper.refreshing = false;
+				}
+			});
+		});
+	}
+
 	private refresh():void{
 		if(this.refreshing){
 			return;
