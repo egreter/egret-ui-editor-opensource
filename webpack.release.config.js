@@ -93,13 +93,13 @@ module.exports = {
 					options: {
 						name: '[path][name].[ext]',
 						outputPath: function (url, resourcePath, _context) {
-							if(monacoEditorFontRegex.test(resourcePath.replace(/[\\/]/g, "/"))){
+							if (monacoEditorFontRegex.test(resourcePath.replace(/[\\/]/g, "/"))) {
 								return `egret/workbench/electron-browser/bootstrap/monaco-editor/codicon.ttf`;
 							}
 							return url;
 						},
 						publicPath: function (url, resourcePath, _context) {
-							if(monacoEditorFontRegex.test(resourcePath.replace(/[\\/]/g, "/"))){
+							if (monacoEditorFontRegex.test(resourcePath.replace(/[\\/]/g, "/"))) {
 								return `../../../../../egret/workbench/electron-browser/bootstrap/monaco-editor/codicon.ttf`;
 							}
 							return `../../../../${url}`;
