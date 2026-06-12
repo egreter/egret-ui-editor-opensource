@@ -2324,6 +2324,8 @@ export class ExmlModel implements IExmlModel {
 				var endIndex: number = range[0] + valueRange[2];
 				this.pushTextChange(newValue, startIndex, endIndex);
 			}
+		} else if (this._currentState && value.getNs().uri !== W_EUI.uri && !ignoreState) {
+			this.addProperty(value._host, oldProp, newValue, value.getNs(), ignoreState);
 		}
 	}
 
