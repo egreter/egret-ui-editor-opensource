@@ -12,13 +12,53 @@ Egret UI Editor是一款独立的UI编辑器，其主要功能是针对 `Egret` 
 另外：我们建议您在必要时候配合 VSCode 以及 egret coder 插件一起来进行Exml皮肤文件的编辑，以便可以更严谨的控制皮肤内的代码组织结构。
 目前仍为alpha版本，后续会做部分调整。
 
-## 构建
+## 构建与打包
 
-```
-$ npm run setup-win or npm run setup-mac
+### 开发构建
+```bash
+# 安装依赖
+$ npm run setup-mac  # macOS 系统
+# 或
+$ npm run setup-win  # Windows 系统
+
+# 编译 Webpack
 $ npm run build
+
+# 启动开发调试
 $ npm run start
 ```
+
+### 打包发布 (macOS)
+在 macOS 下，可以使用以下命令打包发布：
+* **通用版本 (Universal)**：同时包含 Intel (x64) 和 Apple Silicon (arm64) 架构，适合绝大多数 Mac：
+  ```bash
+  $ npm run dist-mac-universal
+  ```
+* **Apple Silicon 独立版本 (arm64)**：
+  ```bash
+  $ npm run dist-mac-arm64
+  ```
+* **单芯片版本 (默认主机构架)**：
+  ```bash
+  $ npm run dist-mac
+  ```
+
+### 常见打包报错及解决方案
+
+#### 1. 公示超时失败 (Failed to notarize via notarytool)
+* **报错现象**：打包到最后步骤时卡死或超时报错，提示 `Failed to notarize via notarytool` 或 `HTTPClientError.connectTimeout` 等。
+* **原因**：由于国内网络连接 Apple 的公证服务器极不稳定导致超时。
+* **解决方案**：目前已在 `build/after-sign-hook.js` 中禁用了公证（Notarization）步骤，以确保打包速度和成功率。若日后必须公示发布，请取消该脚本中的注释并配置对应的 `APPLE_ID`、`APPLE_ID_PASS`、`APPLE_TEAM_ID` 环境变量。
+
+#### 2. 时间戳服务不可用 (The timestamp service is not available)
+* **报错现象**：代码签名时报错，提示 `The timestamp service is not available`。
+* **原因**：在对 macOS 应用进行签名时，系统的 `codesign` 默认会联网请求 Apple 的时间戳服务器（`timestamp.apple.com`），网络连接失败时会导致打包中断。
+* **解决方案**：已在 `package.json` 的 `build.mac` 块中添加了 `"timestamp": "none"`，让 `codesign` 绕过该时间服务验证直接签名。
+* **额外技巧 (完全跳过签名)**：如果你只是想快速在本地生成无签名的包，可以在打包命令前加上环境变量来完全关闭签名：
+  ```bash
+  $ CSC_IDENTITY_AUTO_DISCOVERY=false npm run dist-mac-universal
+  ```
+
 
 ## 项目
 
